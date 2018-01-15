@@ -16,7 +16,10 @@ namespace WindowsFormsApplicationDiscon1
         OleDbConnection con = null;
         OleDbDataAdapter adapter = null;
         OleDbDataAdapter adapterArtikel = null;
+        OleDbDataAdapter adapterGruppe = null;
         DataSet ds = null;
+
+        List<DisplayArtikel> lsArtikel = new List<DisplayArtikel>();
         public Form1()
         {
             InitializeComponent();
@@ -55,9 +58,38 @@ namespace WindowsFormsApplicationDiscon1
         {
             adapterArtikel = new OleDbDataAdapter("Select * from tArtikel", con);
             adapterArtikel.Fill(ds, "Artikel"); 
-            dataGridViewAusgabe.DataSource = ds;
-            dataGridViewAusgabe.DataMember = "Artikel";
+            //dataGridViewAusgabe.DataSource = ds;
+            //dataGridViewAusgabe.DataMember = "Artikel";
+            adapterGruppe = new OleDbDataAdapter("Select * from tArtGruppe", con);
+            adapterGruppe.Fill(ds, "ArtGruppe");
 
+            DataTableReader reader = ds.Tables["Artikel"].CreateDataReader();
+            while(reader.Read())
+            {
+                DisplayArtikel da = new DisplayArtikel();
+                da.ArtNr = reader.GetString(1);
+                da.Bezeichnung = reader.GetString(4);
+                da.ArtGruppe = GetArtGruppe(reader.GetInt32(3));
+                lsArtikel.Add(da);
+
+            }
+            dataGridViewAusgabe.DataSource = lsArtikel;
+        }
+
+        private string GetArtGruppe(int id)
+        {
+            String bez = "";
+            DataTableReader r = ds.Tables["ArtGruppe"].CreateDataReader();
+            while(r.Read())
+            {
+                if(r.GetInt32(0) == id)
+                {
+                    bez = r.GetString(1);
+                    break;
+                }
+            }
+
+            return bez;
         }
 
         private void buttonWrite_Click(object sender, EventArgs e)
