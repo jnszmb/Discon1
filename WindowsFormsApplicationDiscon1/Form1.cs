@@ -16,7 +16,7 @@ namespace WindowsFormsApplicationDiscon1
         OleDbConnection con = null;
         OleDbDataAdapter adapter = null;
         OleDbDataAdapter adapterArtikel = null;
-        OleDbDataAdapter adapterGruppe = null;
+        OleDbDataAdapter adGruppe = null;
         DataSet ds = null;
 
         List<DisplayArtikel> lsArtikel = new List<DisplayArtikel>();
@@ -26,6 +26,10 @@ namespace WindowsFormsApplicationDiscon1
             ds = new DataSet();
             con = new OleDbConnection();
             con.ConnectionString = Properties.Settings.Default.DBCon;
+            adapterArtikel = new OleDbDataAdapter("Select * from tArtikel", con);
+            adGruppe = new OleDbDataAdapter("Select * from tArtGruppe", con);
+            adGruppe.FillSchema(ds, SchemaType.Source, "AGruppe");
+            adGruppe.Fill(ds, "AGruppe");
         }
 
         private void buttonDataAdapter_Click(object sender, EventArgs e)
@@ -56,45 +60,60 @@ namespace WindowsFormsApplicationDiscon1
 
         private void buttonArtikel_Click(object sender, EventArgs e)
         {
-            adapterArtikel = new OleDbDataAdapter("Select * from tArtikel", con);
-            adapterArtikel.Fill(ds, "Artikel"); 
-            //dataGridViewAusgabe.DataSource = ds;
-            //dataGridViewAusgabe.DataMember = "Artikel";
-            adapterGruppe = new OleDbDataAdapter("Select * from tArtGruppe", con);
-            adapterGruppe.Fill(ds, "ArtGruppe");
-
+            adapterArtikel.FillSchema(ds, SchemaType.Source, "Artikel");
+            ds.Tables["Artikel"].Columns[0].AutoIncrement = true;
+            adapterArtikel.Fill(ds, "Artikel");
             DataTableReader reader = ds.Tables["Artikel"].CreateDataReader();
             while(reader.Read())
             {
                 DisplayArtikel da = new DisplayArtikel();
+                da.ArtikelOid = reader.GetInt32(0);
                 da.ArtNr = reader.GetString(1);
-                da.Bezeichnung = reader.GetString(4);
-                da.ArtGruppe = GetArtGruppe(reader.GetInt32(3));
+                da.ArtGruppe = GetArtGruppe(reader.GetInt32(2));
+                da.Bezeichnung = reader.GetString(3);
+                da.Bestand = reader.GetByte(4);
+                da.Meldebestand = reader.GetInt16(5);           
                 lsArtikel.Add(da);
-
             }
+            reader.Close();
             dataGridViewAusgabe.DataSource = lsArtikel;
+            
+            
+            //dataGridViewAusgabe.DataSource = ds;
+            //dataGridViewAusgabe.DataMember = "Artikel";
+            //adapterGruppe = new OleDbDataAdapter("Select * from tArtGruppe", con);
+            //adapterGruppe.Fill(ds, "ArtGruppe");
+
+           
+            
+            
+            
+            
+            
+            //DataTableReader reader = ds.Tables["Artikel"].CreateDataReader();
+            //while(reader.Read())
+            //{
+            //    DisplayArtikel da = new DisplayArtikel();
+            //    da.ArtNr = reader.GetString(1);
+            //    da.Bezeichnung = reader.GetString(3);
+            //    da.ArtGruppe = GetArtGruppe(reader.GetInt32(2));
+            //    lsArtikel.Add(da);
+
+            //}
+            //dataGridViewAusgabe.DataSource = lsArtikel;
         }
 
         private string GetArtGruppe(int id)
         {
-            String bez = "";
-            DataTableReader r = ds.Tables["ArtGruppe"].CreateDataReader();
-            while(r.Read())
-            {
-                if(r.GetInt32(0) == id)
-                {
-                    bez = r.GetString(1);
-                    break;
-                }
-            }
-
+            String bez = "xxx";
+            DataRow row =  ds.Tables["AGruppe"].Rows.Find(id);
+            bez = (String)row[1];
             return bez;
         }
 
         private void buttonWrite_Click(object sender, EventArgs e)
         {
-            ds.WriteXml("Bestellung.xml");
+            ds.WriteXml("Bestellung.xml", XmlWriteMode.DiffGram);
             ds.WriteXmlSchema("Bestellung.xsd");
 
         }
@@ -102,7 +121,7 @@ namespace WindowsFormsApplicationDiscon1
         private void buttonRead_Click(object sender, EventArgs e)
         {
             ds.ReadXmlSchema("Bestellung.xsd"); // liest Datentypen aus
-            ds.ReadXml("Bestellung.xml");
+            ds.ReadXml("Bestellung.xml", XmlReadMode.DiffGram);
             dataGridViewAusgabe.DataSource = ds;
             dataGridViewAusgabe.DataMember = "Artikel";
             DataTableReader reader = ds.Tables["Kunde"].CreateDataReader();
@@ -112,8 +131,14 @@ namespace WindowsFormsApplicationDiscon1
                 listBoxAusgabe.Items.Add(reader.GetString(2));
             }
             reader.Close();
-            
-
+        }
+        private void buttonDBSync_Click(object sender, EventArgs e)
+        {
+            OleDbCommandBuilder builder = new OleDbCommandBuilder(adapterArtikel);
+            adapterArtikel.DeleteCommand = builder.GetDeleteCommand();
+            adapterArtikel.InsertCommand = builder.GetInsertCommand();
+            adapterArtikel.UpdateCommand = builder.GetUpdateCommand();
+            adapterArtikel.Update(ds.Tables["Artikel"]);
         }
     }
 }

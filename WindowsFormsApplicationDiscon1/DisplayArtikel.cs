@@ -12,6 +12,8 @@ namespace WindowsFormsApplicationDiscon1
         String bezeichnung;
         String artGruppe;
 
+        public int ArtikelOid { get; set; }
+
         public string ArtNr
         {
             get
@@ -51,6 +53,9 @@ namespace WindowsFormsApplicationDiscon1
             }
         }
 
+        public ushort Bestand { get; set; }
+
+        public Int16 Meldebestand { get; set; }
 
     }
 }

@@ -36,6 +36,7 @@
             this.buttonArtikel = new System.Windows.Forms.Button();
             this.buttonWrite = new System.Windows.Forms.Button();
             this.buttonRead = new System.Windows.Forms.Button();
+            this.buttonDBSync = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridViewAusgabe)).BeginInit();
             this.SuspendLayout();
             // 
@@ -115,11 +116,22 @@
             this.buttonRead.UseVisualStyleBackColor = true;
             this.buttonRead.Click += new System.EventHandler(this.buttonRead_Click);
             // 
+            // buttonDBSync
+            // 
+            this.buttonDBSync.Location = new System.Drawing.Point(579, 160);
+            this.buttonDBSync.Name = "buttonDBSync";
+            this.buttonDBSync.Size = new System.Drawing.Size(179, 30);
+            this.buttonDBSync.TabIndex = 8;
+            this.buttonDBSync.Text = "Datenbank synchronisieren";
+            this.buttonDBSync.UseVisualStyleBackColor = true;
+            this.buttonDBSync.Click += new System.EventHandler(this.buttonDBSync_Click);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(789, 501);
+            this.Controls.Add(this.buttonDBSync);
             this.Controls.Add(this.buttonRead);
             this.Controls.Add(this.buttonWrite);
             this.Controls.Add(this.buttonArtikel);
@@ -145,6 +157,7 @@
         private System.Windows.Forms.Button buttonArtikel;
         private System.Windows.Forms.Button buttonWrite;
         private System.Windows.Forms.Button buttonRead;
+        private System.Windows.Forms.Button buttonDBSync;
     }
 }
 
